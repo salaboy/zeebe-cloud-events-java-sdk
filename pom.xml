@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.zeebe.cloudevents</groupId>
-	<artifactId>zeebe-cloud-events-sdk</artifactId>
+	<artifactId>zeebe-cloud-events-java-sdk</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>zeebe-cloud-events-sdk</name>
+	<name>zeebe-cloud-events-java-sdk</name>
 	<description>Zeebe Cloud Events SDK for Spring Boot</description>
 
 	<properties>
