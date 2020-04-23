@@ -30,7 +30,7 @@ public class ZeebeCloudEventsHelper {
      * This method will create a Zeebe Cloud Event from an ActivatedJob inside a worker, this allow other systems to consume
      * this Cloud Event and
      */
-    public static CloudEvent<AttributesImpl, String> createCloudEventFromJob(ActivatedJob job){
+    public static CloudEvent<AttributesImpl, String> createZeebeCloudEventFromJob(ActivatedJob job){
         ZeebeCloudEventExtension zeebeCloudEventExtension = new ZeebeCloudEventExtension();
         // I need to do the HTTP to Cloud Events mapping here, that means picking up the CorrelationKey header and add it to the Cloud Event
         zeebeCloudEventExtension.setBpmnActivityId(String.valueOf(job.getElementInstanceKey()));
@@ -53,6 +53,15 @@ public class ZeebeCloudEventsHelper {
                 .build();
 
         return zeebeCloudEvent;
+    }
+
+
+    /*
+     * Using a CloudEventsBuilder we can create a ZeebeCloudEvent with the following builder
+     */
+    public static ZeebeCloudEventBuilder buildZeebeCloudEvent(CloudEventBuilder<String> cloudEventBuilder){
+
+        cloudEventBuilder.withExtension(zeebe);
     }
 
 
