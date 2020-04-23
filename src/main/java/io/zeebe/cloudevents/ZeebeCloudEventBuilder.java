@@ -7,21 +7,21 @@ import io.cloudevents.v03.CloudEventBuilder;
 
 public class ZeebeCloudEventBuilder {
     private CloudEventBuilder<String> cloudEventBuilder;
-    private static final ZeebeCloudEventBuilder zeebeCloudEventBuilder = new ZeebeCloudEventBuilder();
     private final ZeebeCloudEventExtension zeebeCloudEventExtension;
 
-    public ZeebeCloudEventBuilder() {
+    public ZeebeCloudEventBuilder(CloudEventBuilder<String> cloudEventBuilder) {
+        this.cloudEventBuilder = cloudEventBuilder;
         zeebeCloudEventExtension = new ZeebeCloudEventExtension();
     }
 
 
-    public ZeebeCloudEventBuilder withCorrelationKey(String correlationKey){
+    public ZeebeCloudEventBuilder withCorrelationKey(String correlationKey) {
         zeebeCloudEventExtension.setCorrelationKey(correlationKey);
-        return zeebeCloudEventBuilder;
+        return this;
     }
 
 
-    public CloudEvent<AttributesImpl, String> build(){
+    public CloudEvent<AttributesImpl, String> build() {
         ExtensionFormat zeebe = new ZeebeCloudEventExtension.Format(zeebeCloudEventExtension);
         return cloudEventBuilder
                 .withExtension(zeebe)

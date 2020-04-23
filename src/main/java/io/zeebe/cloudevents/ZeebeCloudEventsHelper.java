@@ -60,8 +60,7 @@ public class ZeebeCloudEventsHelper {
      * Using a CloudEventsBuilder we can create a ZeebeCloudEvent with the following builder
      */
     public static ZeebeCloudEventBuilder buildZeebeCloudEvent(CloudEventBuilder<String> cloudEventBuilder){
-
-        cloudEventBuilder.withExtension(zeebe);
+        return new ZeebeCloudEventBuilder(cloudEventBuilder);
     }
 
 
