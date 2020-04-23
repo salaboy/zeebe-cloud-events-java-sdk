@@ -1,11 +1,14 @@
 package io.zeebe.cloudevents;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.cloudevents.extensions.ExtensionFormat;
 import io.cloudevents.extensions.InMemoryFormat;
+import io.cloudevents.json.Json;
 
 import java.util.*;
 
 // @TODO: can this live in a library?
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ZeebeCloudEventExtension {
     private String correlationKey;
     private String bpmnActivityName;
@@ -60,6 +63,11 @@ public class ZeebeCloudEventExtension {
 
     public void setJobKey(String jobKey) {
         this.jobKey = jobKey;
+    }
+
+    @Override
+    public String toString() {
+        return Json.encode(this);
     }
 
     @Override
@@ -128,6 +136,11 @@ public class ZeebeCloudEventExtension {
 
             ZeebeCloudEventExtension zcee = new ZeebeCloudEventExtension();
             zcee.setCorrelationKey(correlationKey);
+            zcee.setBpmnActivityId(bpmnActivityId);
+            zcee.setBpmnActivityName(bpmnActivityName);
+            zcee.setJobKey(jobKey);
+            zcee.setWorkflowKey(workflowKey);
+            zcee.setWorkflowInstanceKey(workflowInstanceKey);
 
 
             InMemoryFormat inMemory =
