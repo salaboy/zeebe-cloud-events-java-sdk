@@ -19,6 +19,11 @@ public class ZeebeCloudEventBuilder {
         return this;
     }
 
+    public ZeebeCloudEventBuilder withJobKey(String jobKey) {
+        zeebeCloudEventExtension.setJobKey(jobKey);
+        return this;
+    }
+
     public ZeebeCloudEventBuilder withWorkflowKey(String workflowKey) {
         zeebeCloudEventExtension.setWorkflowKey(workflowKey);
         return this;
