@@ -18,12 +18,17 @@ public class ZeebeCloudEventsHelper {
     /*
      * This method will parse an HTTP request (headers and body) and it will create a Zeebe Cloud Event, that means
      * a Cloud Event From cloudevents.io with a Zeebe Extension
+     * If the Zeebe Extension is not present in the headers, it will return a base Cloud Event.
      */
     public static CloudEvent<AttributesImpl, String>  parseZeebeCloudEventFromRequest(Map<String, String> headers, Object body){
         String extension = headers.get(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION);
-        ZeebeCloudEventExtension zeebeCloudEventExtension = Json.decodeValue(extension, ZeebeCloudEventExtension.class);
-        final ExtensionFormat zeebe = new ZeebeCloudEventExtension.Format(zeebeCloudEventExtension);
-        return CloudEventsHelper.parseFromRequestWithExtension(headers, body, zeebe);
+        if(extension != null && !extension.equals("")) {
+            ZeebeCloudEventExtension zeebeCloudEventExtension = Json.decodeValue(extension, ZeebeCloudEventExtension.class);
+            final ExtensionFormat zeebe = new ZeebeCloudEventExtension.Format(zeebeCloudEventExtension);
+            return CloudEventsHelper.parseFromRequestWithExtension(headers, body, zeebe);
+        }else {
+            return CloudEventsHelper.parseFromRequest(headers, body);
+        }
     }
 
     /*
@@ -57,7 +62,8 @@ public class ZeebeCloudEventsHelper {
 
 
     /*
-     * Using a CloudEventsBuilder we can create a ZeebeCloudEvent with the following builder
+     * Using a CloudEventsBuilder we can create a ZeebeCloudEventBuilder where we can add the Zeebe Extension parameters
+     * and then build a ZeebeCloudEvent.
      */
     public static ZeebeCloudEventBuilder buildZeebeCloudEvent(CloudEventBuilder<String> cloudEventBuilder){
         return new ZeebeCloudEventBuilder(cloudEventBuilder);
