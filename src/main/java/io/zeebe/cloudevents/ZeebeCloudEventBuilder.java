@@ -14,12 +14,30 @@ public class ZeebeCloudEventBuilder {
         zeebeCloudEventExtension = new ZeebeCloudEventExtension();
     }
 
-
     public ZeebeCloudEventBuilder withCorrelationKey(String correlationKey) {
         zeebeCloudEventExtension.setCorrelationKey(correlationKey);
         return this;
     }
 
+    public ZeebeCloudEventBuilder withWorkflowKey(String workflowKey) {
+        zeebeCloudEventExtension.setWorkflowKey(workflowKey);
+        return this;
+    }
+
+    public ZeebeCloudEventBuilder withWorkflowInstanceKey(String workflowInstanceKey) {
+        zeebeCloudEventExtension.setWorkflowInstanceKey(workflowInstanceKey);
+        return this;
+    }
+
+    public ZeebeCloudEventBuilder withBpmnActivityId(String bpmnActivityId) {
+        zeebeCloudEventExtension.setBpmnActivityId(bpmnActivityId);
+        return this;
+    }
+
+    public ZeebeCloudEventBuilder withBpmnActivityName(String bpmnActivityName) {
+        zeebeCloudEventExtension.setBpmnActivityName(bpmnActivityName);
+        return this;
+    }
 
     public CloudEvent<AttributesImpl, String> build() {
         ExtensionFormat zeebe = new ZeebeCloudEventExtension.Format(zeebeCloudEventExtension);
