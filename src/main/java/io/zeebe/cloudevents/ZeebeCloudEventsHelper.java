@@ -7,12 +7,17 @@ import io.cloudevents.json.Json;
 import io.cloudevents.v03.AttributesImpl;
 import io.cloudevents.v03.CloudEventBuilder;
 import io.zeebe.client.api.response.ActivatedJob;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 public class ZeebeCloudEventsHelper {
 
     /*
@@ -67,6 +72,29 @@ public class ZeebeCloudEventsHelper {
      */
     public static ZeebeCloudEventBuilder buildZeebeCloudEvent(CloudEventBuilder<String> cloudEventBuilder){
         return new ZeebeCloudEventBuilder(cloudEventBuilder);
+    }
+
+    public static void emitZeebeCloudEventHTTPFromJob(ActivatedJob job, String host) {
+
+        final CloudEvent<AttributesImpl, String> myCloudEvent = ZeebeCloudEventsHelper.createZeebeCloudEventFromJob(job);
+
+        log.info(Json.encode(myCloudEvent));
+
+        WebClient webClient = WebClient.builder().baseUrl(host).filter(logRequest()).build();
+
+        WebClient.ResponseSpec postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, "/", myCloudEvent);
+
+        postCloudEvent.bodyToMono(String.class).doOnError(t -> t.printStackTrace())
+                .doOnSuccess(s -> log.info("Result -> " + s)).subscribe();
+    }
+
+    //@TODO: refactor to helper class
+    public static ExchangeFilterFunction logRequest() {
+        return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
+            log.info("Request: " + clientRequest.method() + " - " + clientRequest.url());
+            clientRequest.headers().forEach((name, values) -> values.forEach(value -> log.info(name + "=" + value)));
+            return Mono.just(clientRequest);
+        });
     }
 
 
