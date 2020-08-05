@@ -1,5 +1,7 @@
 package io.zeebe.cloudevents;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salaboy.cloudevents.helper.CloudEventsHelper;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.extensions.ExtensionFormat;
@@ -20,6 +22,7 @@ import java.util.UUID;
 @Slf4j
 public class ZeebeCloudEventsHelper {
 
+    private static ObjectMapper mapper = new ObjectMapper();
     /*
      * This method will parse an HTTP request (headers and body) and it will create a Zeebe Cloud Event, that means
      * a Cloud Event From cloudevents.io with a Zeebe Extension
@@ -40,7 +43,7 @@ public class ZeebeCloudEventsHelper {
      * This method will create a Zeebe Cloud Event from an ActivatedJob inside a worker, this allow other systems to consume
      * this Cloud Event and
      */
-    public static CloudEvent<AttributesImpl, String> createZeebeCloudEventFromJob(ActivatedJob job){
+    public static CloudEvent<AttributesImpl, String> createZeebeCloudEventFromJob(ActivatedJob job) throws JsonProcessingException {
         ZeebeCloudEventExtension zeebeCloudEventExtension = new ZeebeCloudEventExtension();
         // I need to do the HTTP to Cloud Events mapping here, that means picking up the CorrelationKey header and add it to the Cloud Event
         zeebeCloudEventExtension.setBpmnActivityId(String.valueOf(job.getElementInstanceKey()));
@@ -51,12 +54,14 @@ public class ZeebeCloudEventsHelper {
 
         final ExtensionFormat zeebe = new ZeebeCloudEventExtension.Format(zeebeCloudEventExtension);
 
+        String variables = mapper.writerWithDefaultPrettyPrinter()
+                .writeValueAsString(job.getVariablesAsMap());
         final CloudEvent<AttributesImpl, String> zeebeCloudEvent = CloudEventBuilder.<String>builder()
                 .withId(UUID.randomUUID().toString())
                 .withTime(ZonedDateTime.now())
                 .withType(job.getCustomHeaders().get(Headers.CLOUD_EVENT_TYPE)) // from headers
                 .withSource(URI.create("zeebe.default.svc.cluster.local"))
-                .withData(job.getVariables())
+                .withData(variables)
                 .withDatacontenttype(Headers.CONTENT_TYPE)
                 .withSubject("Zeebe Job")
                 .withExtension(zeebe)
