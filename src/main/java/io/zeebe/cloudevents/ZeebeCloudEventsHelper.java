@@ -29,6 +29,10 @@ public class ZeebeCloudEventsHelper {
      * If the Zeebe Extension is not present in the headers, it will return a base Cloud Event.
      */
     public static CloudEvent<AttributesImpl, String>  parseZeebeCloudEventFromRequest(Map<String, String> headers, Object body){
+        log.info("Parsing Zeebe Cloud Event from request");
+        for(String key : headers.keySet()){
+            log.info(">> Header Key: " + key + " value: " + headers.get(key));
+        }
         String extension = headers.get(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION);
         if(extension != null && !extension.equals("")) {
             ZeebeCloudEventExtension zeebeCloudEventExtension = Json.decodeValue(extension, ZeebeCloudEventExtension.class);
@@ -79,7 +83,7 @@ public class ZeebeCloudEventsHelper {
         return new ZeebeCloudEventBuilder(cloudEventBuilder);
     }
 
-    public static void emitZeebeCloudEventHTTPFromJob(ActivatedJob job, String host) {
+    public static void emitZeebeCloudEventHTTPFromJob(ActivatedJob job, String host) throws JsonProcessingException {
 
         final CloudEvent<AttributesImpl, String> myCloudEvent = ZeebeCloudEventsHelper.createZeebeCloudEventFromJob(job);
 
