@@ -9,6 +9,7 @@ import io.cloudevents.core.builder.CloudEventBuilder;
 import io.zeebe.client.api.response.ActivatedJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -23,19 +24,24 @@ public class ZeebeCloudEventsHelper {
 
     private static ObjectMapper mapper = new ObjectMapper();
 
+    /*
+     * This method will parse an HTTP request (headers and body) and it will create a Zeebe Cloud Event, that means
+     * a Cloud Event From cloudevents.io with a Zeebe Extension
+     * If the Zeebe Extension is not present in the headers, it will return a base Cloud Event.
+     */
     public static CloudEvent  parseZeebeCloudEventFromRequest(HttpHeaders headers, Object body){
-        ZeebeCloudEventExtension zeebeCloudEventExtension =  createZeebeCloudEventExtension(headers.toSingleValueMap());
+        ZeebeCloudEventExtension zeebeCloudEventExtension =  createZeebeCloudEventExtension(headers);
         return internalParseCloudEventWithExtensionOrDefault(body, headers.toSingleValueMap(), zeebeCloudEventExtension);
     }
 
-    private static ZeebeCloudEventExtension createZeebeCloudEventExtension(Map<String, String> headers) {
+    private static ZeebeCloudEventExtension createZeebeCloudEventExtension(HttpHeaders headers) {
         ZeebeCloudEventExtension zeebeCloudEventExtension =  new ZeebeCloudEventExtension();
-        zeebeCloudEventExtension.setCorrelationKey(headers.get(ZeebeCloudEventExtension.CORRELATION_KEY));
-        zeebeCloudEventExtension.setBpmnActivityId(headers.get(ZeebeCloudEventExtension.BPMN_ACTIVITY_ID));
-        zeebeCloudEventExtension.setBpmnActivityName(headers.get(ZeebeCloudEventExtension.BPMN_ACTIVITY_NAME));
-        zeebeCloudEventExtension.setWorkflowKey(headers.get(ZeebeCloudEventExtension.WORKFLOW_KEY));
-        zeebeCloudEventExtension.setWorkflowInstanceKey(headers.get(ZeebeCloudEventExtension.WORKFLOW_INSTANCE_KEY));
-        zeebeCloudEventExtension.setJobKey(headers.get(ZeebeCloudEventExtension.JOB_KEY));
+        zeebeCloudEventExtension.setCorrelationKey(headers.getFirst(ZeebeCloudEventExtension.CORRELATION_KEY));
+        zeebeCloudEventExtension.setBpmnActivityId(headers.getFirst(ZeebeCloudEventExtension.BPMN_ACTIVITY_ID));
+        zeebeCloudEventExtension.setBpmnActivityName(headers.getFirst(ZeebeCloudEventExtension.BPMN_ACTIVITY_NAME));
+        zeebeCloudEventExtension.setWorkflowKey(headers.getFirst(ZeebeCloudEventExtension.WORKFLOW_KEY));
+        zeebeCloudEventExtension.setWorkflowInstanceKey(headers.getFirst(ZeebeCloudEventExtension.WORKFLOW_INSTANCE_KEY));
+        zeebeCloudEventExtension.setJobKey(headers.getFirst(ZeebeCloudEventExtension.JOB_KEY));
         return zeebeCloudEventExtension;
     }
 
@@ -47,16 +53,6 @@ public class ZeebeCloudEventsHelper {
         }
     }
 
-
-    /*
-     * This method will parse an HTTP request (headers and body) and it will create a Zeebe Cloud Event, that means
-     * a Cloud Event From cloudevents.io with a Zeebe Extension
-     * If the Zeebe Extension is not present in the headers, it will return a base Cloud Event.
-     */
-    public static CloudEvent  parseZeebeCloudEventFromRequest(Map<String, String> headers, Object body){
-        ZeebeCloudEventExtension zeebeCloudEventExtension =  createZeebeCloudEventExtension(headers);
-        return internalParseCloudEventWithExtensionOrDefault(body, headers, zeebeCloudEventExtension);
-    }
 
     /*
      * This method will create a Zeebe Cloud Event from an ActivatedJob inside a worker, this allow other systems to consume
