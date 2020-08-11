@@ -24,11 +24,7 @@ public class ZeebeCloudEventsHelper {
     private static ObjectMapper mapper = new ObjectMapper();
 
     public static CloudEvent  parseZeebeCloudEventFromRequest(HttpHeaders headers, Object body){
-        ZeebeCloudEventExtension zeebeCloudEventExtension = null;
-        if(headers.containsKey(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION)){
-            zeebeCloudEventExtension = createZeebeCloudEventExtension(headers.toSingleValueMap());
-
-        }
+        ZeebeCloudEventExtension zeebeCloudEventExtension =  createZeebeCloudEventExtension(headers.toSingleValueMap());
         return internalParseCloudEventWithExtensionOrDefault(body, headers.toSingleValueMap(), zeebeCloudEventExtension);
     }
 
@@ -58,10 +54,7 @@ public class ZeebeCloudEventsHelper {
      * If the Zeebe Extension is not present in the headers, it will return a base Cloud Event.
      */
     public static CloudEvent  parseZeebeCloudEventFromRequest(Map<String, String> headers, Object body){
-        ZeebeCloudEventExtension zeebeCloudEventExtension = null;
-        if(headers.containsKey(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION)){
-            zeebeCloudEventExtension = createZeebeCloudEventExtension(headers);
-        }
+        ZeebeCloudEventExtension zeebeCloudEventExtension =  createZeebeCloudEventExtension(headers);
         return internalParseCloudEventWithExtensionOrDefault(body, headers, zeebeCloudEventExtension);
     }
 
