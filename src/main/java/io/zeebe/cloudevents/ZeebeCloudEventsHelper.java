@@ -10,6 +10,7 @@ import io.cloudevents.v03.AttributesImpl;
 import io.cloudevents.v03.CloudEventBuilder;
 import io.zeebe.client.api.response.ActivatedJob;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -23,16 +24,25 @@ import java.util.UUID;
 public class ZeebeCloudEventsHelper {
 
     private static ObjectMapper mapper = new ObjectMapper();
+
+    public static CloudEvent<AttributesImpl, String>  parseZeebeCloudEventFromRequest(HttpHeaders headers, Object body){
+        String extension = headers.getFirst(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION);
+        if(extension != null && !extension.equals("")) {
+            ZeebeCloudEventExtension zeebeCloudEventExtension = Json.decodeValue(extension, ZeebeCloudEventExtension.class);
+            final ExtensionFormat zeebe = new ZeebeCloudEventExtension.Format(zeebeCloudEventExtension);
+            return CloudEventsHelper.parseFromRequestWithExtension(headers.toSingleValueMap(), body, zeebe);
+        }else {
+            return CloudEventsHelper.parseFromRequest(headers.toSingleValueMap(), body);
+        }
+    }
+
+
     /*
      * This method will parse an HTTP request (headers and body) and it will create a Zeebe Cloud Event, that means
      * a Cloud Event From cloudevents.io with a Zeebe Extension
      * If the Zeebe Extension is not present in the headers, it will return a base Cloud Event.
      */
     public static CloudEvent<AttributesImpl, String>  parseZeebeCloudEventFromRequest(Map<String, String> headers, Object body){
-        log.info("Parsing Zeebe Cloud Event from request");
-        for(String key : headers.keySet()){
-            log.info(">> Header Key: " + key + " value: " + headers.get(key));
-        }
         String extension = headers.get(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION);
         if(extension != null && !extension.equals("")) {
             ZeebeCloudEventExtension zeebeCloudEventExtension = Json.decodeValue(extension, ZeebeCloudEventExtension.class);
