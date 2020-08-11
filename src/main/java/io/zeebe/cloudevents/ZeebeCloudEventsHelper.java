@@ -70,14 +70,13 @@ public class ZeebeCloudEventsHelper {
         zeebeCloudEventExtension.setWorkflowKey(String.valueOf(job.getWorkflowKey()));
         zeebeCloudEventExtension.setWorkflowInstanceKey(String.valueOf(job.getWorkflowInstanceKey()));
 
-        String variables = mapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(job.getVariablesAsMap());
+
         final CloudEvent zeebeCloudEvent = CloudEventBuilder.v03()
                 .withId(UUID.randomUUID().toString())
                 .withTime(ZonedDateTime.now())
                 .withType(job.getCustomHeaders().get(Headers.CLOUD_EVENT_TYPE)) // from headers
                 .withSource(URI.create("zeebe.default.svc.cluster.local"))
-                .withData(variables.getBytes())
+                .withData(job.getVariables().getBytes())
                 .withDataContentType(Headers.CONTENT_TYPE)
                 .withSubject("Zeebe Job")
                 .withExtension(zeebeCloudEventExtension)
