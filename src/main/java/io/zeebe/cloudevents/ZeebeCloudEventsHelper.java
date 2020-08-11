@@ -70,6 +70,7 @@ public class ZeebeCloudEventsHelper {
         zeebeCloudEventExtension.setWorkflowKey(String.valueOf(job.getWorkflowKey()));
         zeebeCloudEventExtension.setWorkflowInstanceKey(String.valueOf(job.getWorkflowInstanceKey()));
 
+        log.info(">>>>> Job Variables: " + job.getVariables());
 
         final CloudEvent zeebeCloudEvent = CloudEventBuilder.v03()
                 .withId(UUID.randomUUID().toString())
