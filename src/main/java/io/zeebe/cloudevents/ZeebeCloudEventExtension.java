@@ -1,21 +1,40 @@
 package io.zeebe.cloudevents;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.cloudevents.extensions.ExtensionFormat;
-import io.cloudevents.extensions.InMemoryFormat;
-import io.cloudevents.json.Json;
+import io.cloudevents.CloudEventExtensions;
+import io.cloudevents.Extension;
+import io.cloudevents.core.extensions.impl.ExtensionUtils;
 
 import java.util.*;
 
 // @TODO: can this live in a library?
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ZeebeCloudEventExtension {
+public class ZeebeCloudEventExtension implements Extension {
     private String correlationKey;
     private String bpmnActivityName;
     private String bpmnActivityId;
     private String workflowKey;
     private String workflowInstanceKey;
     private String jobKey;
+
+
+    public static final String CORRELATION_KEY = "correlationKey";
+    public static final String BPMN_ACTIVITY_ID = "bpmnActivityId";
+    public static final String BPMN_ACTIVITY_NAME = "bpmnActivityName";
+    public static final String WORKFLOW_KEY = "workflowKey";
+    public static final String WORKFLOW_INSTANCE_KEY = "workflowInstanceKey";
+    public static final String JOB_KEY = "jobKey";
+
+    private static final Set<String> KEY_SET = Collections
+            .unmodifiableSet(
+                    new HashSet<>(
+                        Arrays.asList(CORRELATION_KEY,
+                                BPMN_ACTIVITY_ID,
+                                BPMN_ACTIVITY_NAME,
+                                WORKFLOW_KEY,
+                                WORKFLOW_INSTANCE_KEY,
+                                JOB_KEY )));
+
 
     public String getCorrelationKey() {
         return correlationKey;
@@ -65,10 +84,10 @@ public class ZeebeCloudEventExtension {
         this.jobKey = jobKey;
     }
 
-    @Override
-    public String toString() {
-        return Json.encode(this);
-    }
+//    @Override
+//    public String toString() {
+//        return Json.encode(this);
+//    }
 
     @Override
     public boolean equals(Object o) {
@@ -88,76 +107,56 @@ public class ZeebeCloudEventExtension {
         return Objects.hash(correlationKey, bpmnActivityName, bpmnActivityId, workflowKey, workflowInstanceKey, jobKey);
     }
 
-    public static class Format implements ExtensionFormat {
-        public static final String IN_MEMORY_KEY = "zeebe";
-        public static final String CORRELATION_KEY = "correlationKey";
-        public static final String BPMN_ACTIVITY_ID = "bpmnActivityId";
-        public static final String BPMN_ACTIVITY_NAME = "bpmnActivityName";
-        public static final String WORKFLOW_KEY = "workflowKey";
-        public static final String WORKFLOW_INSTANCE_KEY = "workflowInstanceKey";
-        public static final String JOB_KEY = "jobKey";
-
-        private final InMemoryFormat memory;
-        private final Map<String, String> transport = new HashMap<>();
-
-        public Format(ZeebeCloudEventExtension extension) {
-            Objects.requireNonNull(extension);
-
-            memory = InMemoryFormat.of(IN_MEMORY_KEY, extension,
-                    ZeebeCloudEventExtension.class);
-            transport.put(CORRELATION_KEY, extension.getCorrelationKey());
-            transport.put(BPMN_ACTIVITY_ID, extension.getBpmnActivityId());
-            transport.put(BPMN_ACTIVITY_NAME, extension.getBpmnActivityName());
-            transport.put(WORKFLOW_KEY, extension.getWorkflowKey());
-            transport.put(WORKFLOW_INSTANCE_KEY, extension.getWorkflowInstanceKey());
-            transport.put(JOB_KEY, extension.getJobKey());
-
+    @Override
+    public void readFrom(CloudEventExtensions extensions) {
+        Object correlationKey = extensions.getExtension(CORRELATION_KEY);
+        if (correlationKey != null) {
+            this.correlationKey = correlationKey.toString();
         }
-
-        @Override
-        public InMemoryFormat memory() {
-            return memory;
+        Object bpmnActivityId = extensions.getExtension(BPMN_ACTIVITY_ID);
+        if (bpmnActivityId != null) {
+            this.bpmnActivityId = bpmnActivityId.toString();
         }
-
-        @Override
-        public Map<String, String> transport() {
-            return transport;
+        Object bpmnActivityName = extensions.getExtension(BPMN_ACTIVITY_NAME);
+        if (bpmnActivityName != null) {
+            this.bpmnActivityName = bpmnActivityName.toString();
         }
-
-        public static Optional<ExtensionFormat> unmarshall(
-                Map<String, String> exts) {
-            String correlationKey = exts.get(Format.CORRELATION_KEY);
-            String bpmnActivityId = exts.get(Format.BPMN_ACTIVITY_ID);
-            String bpmnActivityName = exts.get(Format.BPMN_ACTIVITY_NAME);
-            String workflowKey = exts.get(Format.WORKFLOW_KEY);
-            String workflowInstanceKey = exts.get(Format.WORKFLOW_INSTANCE_KEY);
-            String jobKey = exts.get(Format.JOB_KEY);
-
-
-            ZeebeCloudEventExtension zcee = new ZeebeCloudEventExtension();
-            zcee.setCorrelationKey(correlationKey);
-            zcee.setBpmnActivityId(bpmnActivityId);
-            zcee.setBpmnActivityName(bpmnActivityName);
-            zcee.setJobKey(jobKey);
-            zcee.setWorkflowKey(workflowKey);
-            zcee.setWorkflowInstanceKey(workflowInstanceKey);
-
-
-            InMemoryFormat inMemory =
-                    InMemoryFormat.of(Format.IN_MEMORY_KEY, zcee,
-                            ZeebeCloudEventExtension.class);
-
-            return Optional.of(
-                    ExtensionFormat.of(inMemory,
-                            new AbstractMap.SimpleEntry<>(Format.CORRELATION_KEY, correlationKey),
-                            new AbstractMap.SimpleEntry<>(Format.BPMN_ACTIVITY_ID, bpmnActivityId),
-                            new AbstractMap.SimpleEntry<>(Format.BPMN_ACTIVITY_NAME, bpmnActivityName),
-                            new AbstractMap.SimpleEntry<>(Format.WORKFLOW_KEY, workflowKey),
-                            new AbstractMap.SimpleEntry<>(Format.WORKFLOW_INSTANCE_KEY, workflowInstanceKey),
-                            new AbstractMap.SimpleEntry<>(Format.JOB_KEY, jobKey)
-                    )
-            );
-
+        Object workflowKey = extensions.getExtension(WORKFLOW_KEY);
+        if (workflowKey != null) {
+            this.workflowKey = workflowKey.toString();
+        }
+        Object workflowInstanceKey = extensions.getExtension(WORKFLOW_INSTANCE_KEY);
+        if (workflowInstanceKey != null) {
+            this.workflowInstanceKey = workflowInstanceKey.toString();
+        }
+        Object jobKey = extensions.getExtension(JOB_KEY);
+        if (jobKey != null) {
+            this.jobKey = jobKey.toString();
         }
     }
+
+    @Override
+    public Object getValue(String key) throws IllegalArgumentException {
+        switch (key) {
+            case CORRELATION_KEY:
+                return this.correlationKey;
+            case BPMN_ACTIVITY_ID:
+                return this.bpmnActivityId;
+            case BPMN_ACTIVITY_NAME:
+                return this.bpmnActivityName;
+            case WORKFLOW_KEY:
+                return this.workflowKey;
+            case WORKFLOW_INSTANCE_KEY:
+                return this.workflowInstanceKey;
+            case JOB_KEY:
+                return this.jobKey;
+        }
+        throw ExtensionUtils.generateInvalidKeyException(this.getClass().getSimpleName(), key);
+    }
+
+    @Override
+    public Set<String> getKeys() {
+        return KEY_SET;
+    }
+
 }

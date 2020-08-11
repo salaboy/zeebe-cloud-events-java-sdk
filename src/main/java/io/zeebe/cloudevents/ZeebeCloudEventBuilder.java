@@ -1,15 +1,14 @@
 package io.zeebe.cloudevents;
 
 import io.cloudevents.CloudEvent;
-import io.cloudevents.extensions.ExtensionFormat;
-import io.cloudevents.v03.AttributesImpl;
-import io.cloudevents.v03.CloudEventBuilder;
+import io.cloudevents.core.builder.CloudEventBuilder;
+
 
 public class ZeebeCloudEventBuilder {
-    private CloudEventBuilder<String> cloudEventBuilder;
+    private CloudEventBuilder cloudEventBuilder;
     private final ZeebeCloudEventExtension zeebeCloudEventExtension;
 
-    public ZeebeCloudEventBuilder(CloudEventBuilder<String> cloudEventBuilder) {
+    public ZeebeCloudEventBuilder(CloudEventBuilder cloudEventBuilder) {
         this.cloudEventBuilder = cloudEventBuilder;
         zeebeCloudEventExtension = new ZeebeCloudEventExtension();
     }
@@ -44,10 +43,9 @@ public class ZeebeCloudEventBuilder {
         return this;
     }
 
-    public CloudEvent<AttributesImpl, String> build() {
-        ExtensionFormat zeebe = new ZeebeCloudEventExtension.Format(zeebeCloudEventExtension);
+    public CloudEvent build() {
         return cloudEventBuilder
-                .withExtension(zeebe)
+                .withExtension(new ZeebeCloudEventExtension())
                 .build();
     }
 }
