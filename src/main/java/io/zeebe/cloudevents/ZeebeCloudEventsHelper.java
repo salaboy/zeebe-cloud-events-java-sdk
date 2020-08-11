@@ -24,13 +24,28 @@ public class ZeebeCloudEventsHelper {
     private static ObjectMapper mapper = new ObjectMapper();
 
     public static CloudEvent  parseZeebeCloudEventFromRequest(HttpHeaders headers, Object body){
-        boolean withZeebeExtension = headers.containsKey(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION);
-        return internalParseCloudEventWithExtensionOrDefault(body, headers.toSingleValueMap(), withZeebeExtension);
+        ZeebeCloudEventExtension zeebeCloudEventExtension = null;
+        if(headers.containsKey(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION)){
+            zeebeCloudEventExtension = createZeebeCloudEventExtension(headers.toSingleValueMap());
+
+        }
+        return internalParseCloudEventWithExtensionOrDefault(body, headers.toSingleValueMap(), zeebeCloudEventExtension);
     }
 
-    private static CloudEvent internalParseCloudEventWithExtensionOrDefault(Object body,  Map<String, String> headers, boolean withZeebeExtension) {
-        if (withZeebeExtension) {
-            return CloudEventsHelper.parseFromRequestWithExtension(headers, body, new ZeebeCloudEventExtension());
+    private static ZeebeCloudEventExtension createZeebeCloudEventExtension(Map<String, String> headers) {
+        ZeebeCloudEventExtension zeebeCloudEventExtension =  new ZeebeCloudEventExtension();
+        zeebeCloudEventExtension.setCorrelationKey(headers.get(ZeebeCloudEventExtension.CORRELATION_KEY));
+        zeebeCloudEventExtension.setBpmnActivityId(headers.get(ZeebeCloudEventExtension.BPMN_ACTIVITY_ID));
+        zeebeCloudEventExtension.setBpmnActivityName(headers.get(ZeebeCloudEventExtension.BPMN_ACTIVITY_NAME));
+        zeebeCloudEventExtension.setWorkflowKey(headers.get(ZeebeCloudEventExtension.WORKFLOW_KEY));
+        zeebeCloudEventExtension.setWorkflowInstanceKey(headers.get(ZeebeCloudEventExtension.WORKFLOW_INSTANCE_KEY));
+        zeebeCloudEventExtension.setJobKey(headers.get(ZeebeCloudEventExtension.JOB_KEY));
+        return zeebeCloudEventExtension;
+    }
+
+    private static CloudEvent internalParseCloudEventWithExtensionOrDefault(Object body,  Map<String, String> headers, ZeebeCloudEventExtension extension) {
+        if (extension != null) {
+            return CloudEventsHelper.parseFromRequestWithExtension(headers, body, extension);
         } else {
             return CloudEventsHelper.parseFromRequest(headers, body);
         }
@@ -43,8 +58,11 @@ public class ZeebeCloudEventsHelper {
      * If the Zeebe Extension is not present in the headers, it will return a base Cloud Event.
      */
     public static CloudEvent  parseZeebeCloudEventFromRequest(Map<String, String> headers, Object body){
-        boolean withZeebeExtension = headers.containsKey(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION);
-        return internalParseCloudEventWithExtensionOrDefault(body, headers, withZeebeExtension);
+        ZeebeCloudEventExtension zeebeCloudEventExtension = null;
+        if(headers.containsKey(Headers.ZEEBE_CLOUD_EVENTS_EXTENSION)){
+            zeebeCloudEventExtension = createZeebeCloudEventExtension(headers);
+        }
+        return internalParseCloudEventWithExtensionOrDefault(body, headers, zeebeCloudEventExtension);
     }
 
     /*
