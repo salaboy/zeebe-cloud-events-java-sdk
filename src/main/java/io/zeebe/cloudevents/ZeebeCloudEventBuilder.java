@@ -45,7 +45,7 @@ public class ZeebeCloudEventBuilder {
 
     public CloudEvent build() {
         return cloudEventBuilder
-                .withExtension(new ZeebeCloudEventExtension())
+                .withExtension(zeebeCloudEventExtension)
                 .build();
     }
 }
