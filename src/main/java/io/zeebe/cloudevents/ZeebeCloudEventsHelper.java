@@ -29,7 +29,7 @@ public class ZeebeCloudEventsHelper {
      */
     public static CloudEvent  parseZeebeCloudEventFromRequest(HttpHeaders headers, Object body){
         ZeebeCloudEventExtension zeebeCloudEventExtension =  createZeebeCloudEventExtension(headers);
-        return internalParseCloudEventWithExtensionOrDefault(body, headers.toSingleValueMap(), zeebeCloudEventExtension);
+        return internalParseCloudEventWithExtensionOrDefault(body, headers, zeebeCloudEventExtension);
     }
 
     private static ZeebeCloudEventExtension createZeebeCloudEventExtension(HttpHeaders headers) {
@@ -43,7 +43,7 @@ public class ZeebeCloudEventsHelper {
         return zeebeCloudEventExtension;
     }
 
-    private static CloudEvent internalParseCloudEventWithExtensionOrDefault(Object body,  Map<String, String> headers, ZeebeCloudEventExtension extension) {
+    private static CloudEvent internalParseCloudEventWithExtensionOrDefault(Object body,  HttpHeaders headers, ZeebeCloudEventExtension extension) {
         if (extension != null) {
             return CloudEventsHelper.parseFromRequestWithExtension(headers, body, extension);
         } else {
