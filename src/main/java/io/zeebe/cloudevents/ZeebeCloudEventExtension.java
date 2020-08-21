@@ -18,12 +18,12 @@ public class ZeebeCloudEventExtension implements Extension {
     private String jobKey;
 
 
-    public static final String CORRELATION_KEY = "correlationKey";
-    public static final String BPMN_ACTIVITY_ID = "bpmnActivityId";
-    public static final String BPMN_ACTIVITY_NAME = "bpmnActivityName";
-    public static final String WORKFLOW_KEY = "workflowKey";
-    public static final String WORKFLOW_INSTANCE_KEY = "workflowInstanceKey";
-    public static final String JOB_KEY = "jobKey";
+    public static final String CORRELATION_KEY = "Ce-CorrelationKey";
+    public static final String BPMN_ACTIVITY_ID = "Ce-BpmnActivityId";
+    public static final String BPMN_ACTIVITY_NAME = "Ce-BpmnActivityName";
+    public static final String WORKFLOW_KEY = "Ce-WorkflowKey";
+    public static final String WORKFLOW_INSTANCE_KEY = "Ce-WorkflowInstanceKey";
+    public static final String JOB_KEY = "Ce-JobKey";
 
     private static final Set<String> KEY_SET = Collections
             .unmodifiableSet(
