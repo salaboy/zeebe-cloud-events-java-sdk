@@ -13,8 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.time.ZonedDateTime;
-import java.util.Map;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -70,9 +69,9 @@ public class ZeebeCloudEventsHelper {
         ObjectMapper objectMapper = new ObjectMapper();
         log.info(">>>>> Job Variables: " + objectMapper.writeValueAsString(job.getVariables()));
 
-        final CloudEvent zeebeCloudEvent = CloudEventBuilder.v03()
+        final CloudEvent zeebeCloudEvent = CloudEventBuilder.v1()
                 .withId(UUID.randomUUID().toString())
-                .withTime(ZonedDateTime.now())
+                .withTime(OffsetDateTime.now().toZonedDateTime()) // bug-> https://github.com/cloudevents/sdk-java/issues/200
                 .withType(job.getCustomHeaders().get(Headers.CLOUD_EVENT_TYPE)) // from headers
                 .withSource(URI.create("zeebe.default.svc.cluster.local"))
                 .withData(objectMapper.writeValueAsString(job.getVariables()).getBytes())
