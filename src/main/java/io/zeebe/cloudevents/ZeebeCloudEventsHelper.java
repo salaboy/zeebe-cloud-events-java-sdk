@@ -100,7 +100,7 @@ public class ZeebeCloudEventsHelper {
 
         WebClient webClient = WebClient.builder().baseUrl(host).filter(logRequest()).build();
 
-        WebClient.ResponseSpec postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, "/", myCloudEvent);
+        WebClient.ResponseSpec postCloudEvent = CloudEventsHelper.createPostCloudEvent(webClient, myCloudEvent);
 
         postCloudEvent.bodyToMono(String.class).doOnError(t -> t.printStackTrace())
                 .doOnSuccess(s -> log.info("Result -> " + s)).subscribe();
